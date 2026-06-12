@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "dgSpecHash": "1UOW6Ps4uXg=",
+  "success": true,
+  "projectFilePath": "C:\\Work\\embedding-playground\\src\\EmbeddingPlayground.Console\\EmbeddingPlayground.Console.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Florin\\.nuget\\packages\\google.protobuf\\3.30.2\\google.protobuf.3.30.2.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.9\\microsoft.extensions.configuration.10.0.9.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\10.0.9\\microsoft.extensions.configuration.abstractions.10.0.9.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.configuration.binder\\10.0.9\\microsoft.extensions.configuration.binder.10.0.9.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\11.0.0-preview.5.26302.115\\microsoft.extensions.dependencyinjection.11.0.0-preview.5.26302.115.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\11.0.0-preview.5.26302.115\\microsoft.extensions.dependencyinjection.abstractions.11.0.0-preview.5.26302.115.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.diagnostics\\10.0.9\\microsoft.extensions.diagnostics.10.0.9.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.diagnostics.abstractions\\10.0.9\\microsoft.extensions.diagnostics.abstractions.10.0.9.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.http\\10.0.9\\microsoft.extensions.http.10.0.9.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.logging\\10.0.9\\microsoft.extensions.logging.10.0.9.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\10.0.9\\microsoft.extensions.logging.abstractions.10.0.9.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.options\\10.0.9\\microsoft.extensions.options.10.0.9.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\10.0.9\\microsoft.extensions.options.configurationextensions.10.0.9.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.extensions.primitives\\10.0.9\\microsoft.extensions.primitives.10.0.9.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.ml.onnxruntime\\1.26.0\\microsoft.ml.onnxruntime.1.26.0.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.ml.onnxruntime.managed\\1.26.0\\microsoft.ml.onnxruntime.managed.1.26.0.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\microsoft.ml.tokenizers\\2.0.0\\microsoft.ml.tokenizers.2.0.0.nupkg.sha512",
+    "C:\\Users\\Florin\\.nuget\\packages\\system.numerics.tensors\\9.0.0\\system.numerics.tensors.9.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

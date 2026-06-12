@@ -1,0 +1,15 @@
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\bin\Debug\net10.0\EmbeddingPlayground.Llm.deps.json
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\bin\Debug\net10.0\EmbeddingPlayground.Llm.dll
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\bin\Debug\net10.0\EmbeddingPlayground.Llm.pdb
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\bin\Debug\net10.0\EmbeddingPlayground.Core.dll
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\bin\Debug\net10.0\EmbeddingPlayground.Core.pdb
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\obj\Debug\net10.0\EmbeddingPlayground.Llm.csproj.AssemblyReference.cache
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\obj\Debug\net10.0\EmbeddingPlayground.Llm.GeneratedMSBuildEditorConfig.editorconfig
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\obj\Debug\net10.0\EmbeddingPlayground.Llm.AssemblyInfoInputs.cache
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\obj\Debug\net10.0\EmbeddingPlayground.Llm.AssemblyInfo.cs
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\obj\Debug\net10.0\EmbeddingPlayground.Llm.csproj.CoreCompileInputs.cache
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\obj\Debug\net10.0\Embeddin.EE38CC91.Up2Date
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\obj\Debug\net10.0\EmbeddingPlayground.Llm.dll
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\obj\Debug\net10.0\refint\EmbeddingPlayground.Llm.dll
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\obj\Debug\net10.0\EmbeddingPlayground.Llm.pdb
+C:\Work\embedding-playground\src\EmbeddingPlayground.Llm\obj\Debug\net10.0\ref\EmbeddingPlayground.Llm.dll
