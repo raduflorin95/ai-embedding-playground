@@ -1,8 +1,7 @@
 ﻿namespace EmbeddingPlayground.Core.Models;
 
 public sealed record MemoryEntry(
-    Guid Id,
-    string Question,
-    string Answer,
+    string ClusterId,
     float[] Embedding,
-    DateTime CreatedUtc);
+    string Query,
+    string Answer);

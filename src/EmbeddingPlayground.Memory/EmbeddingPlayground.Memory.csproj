@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EmbeddingPlayground.Core\EmbeddingPlayground.Core.csproj" />
+    <ProjectReference Include="..\EmbeddingPlayground.Embeddings\EmbeddingPlayground.Embeddings.csproj" />
   </ItemGroup>
 
 </Project>

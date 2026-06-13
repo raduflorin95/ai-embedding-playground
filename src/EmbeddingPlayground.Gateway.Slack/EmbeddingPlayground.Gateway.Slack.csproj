@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EmbeddingPlayground.Core\EmbeddingPlayground.Core.csproj" />
+    <ProjectReference Include="..\EmbeddingPlayground.Embeddings\EmbeddingPlayground.Embeddings.csproj" />
+    <ProjectReference Include="..\EmbeddingPlayground.Intent\EmbeddingPlayground.Intent.csproj" />
+    <ProjectReference Include="..\EmbeddingPlayground.Llm\EmbeddingPlayground.Llm.csproj" />
+    <ProjectReference Include="..\EmbeddingPlayground.Memory\EmbeddingPlayground.Memory.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -4,11 +4,10 @@ namespace EmbeddingPlayground.Core.Abstractions;
 
 public interface IMemoryStore
 {
-    Task AddAsync(
-        MemoryEntry entry,
-        CancellationToken cancellationToken = default);
+    Task AddAsync(MemoryEntry entry, CancellationToken ct = default);
 
     Task<SearchResult?> FindBestMatchAsync(
-        float[] embedding,
-        CancellationToken cancellationToken = default);
+            string query,
+            float[] embedding,
+            CancellationToken ct = default);
 }

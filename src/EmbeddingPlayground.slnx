@@ -2,6 +2,7 @@
   <Project Path="EmbeddingPlayground.Console/EmbeddingPlayground.Console.csproj" Id="919156a7-f1fd-463f-a0d1-9da46cd79e92" />
   <Project Path="EmbeddingPlayground.Core/EmbeddingPlayground.Core.csproj" Id="a4ab9020-f96c-4cf6-8f67-4a9b509bd8eb" />
   <Project Path="EmbeddingPlayground.Embeddings/EmbeddingPlayground.Embeddings.csproj" Id="61983fd3-776c-4d7a-89ee-89e27995f863" />
+  <Project Path="EmbeddingPlayground.Gateway.Slack/EmbeddingPlayground.Gateway.Slack.csproj" Id="33468796-50c1-4fdc-95b6-f8eab5fe2fee" />
   <Project Path="EmbeddingPlayground.Intent/EmbeddingPlayground.Intent.csproj" Id="ff8f2eb7-d2c3-41d5-ac4a-57b6137e6821" />
   <Project Path="EmbeddingPlayground.Llm/EmbeddingPlayground.Llm.csproj" Id="2e243d88-98fd-4e2f-a124-25a5ef148a7d" />
   <Project Path="EmbeddingPlayground.Memory/EmbeddingPlayground.Memory.csproj" Id="878661b5-4274-4961-b30b-3303d73f4208" />

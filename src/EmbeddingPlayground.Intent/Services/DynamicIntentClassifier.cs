@@ -1,51 +1,52 @@
 ﻿using EmbeddingPlayground.Core.Abstractions;
+using EmbeddingPlayground.Core.Models;
 using EmbeddingPlayground.Intent.Models;
+using Microsoft.ML.OnnxRuntimeGenAI;
+using System.Reflection;
+using System.Text;
+using System.Text.Json;
 
 namespace EmbeddingPlayground.Intent.Services;
 
 public sealed class DynamicIntentClassifier
 {
-    private readonly IEmbeddingService _embedding;
+    private readonly IEmbeddingService _embed;
     private readonly List<IntentCluster> _clusters = new();
+
     private readonly float _threshold;
 
-    public DynamicIntentClassifier(IEmbeddingService embedding, float threshold = 0.86f)
+    public DynamicIntentClassifier(IEmbeddingService embed, float threshold = 0.82f)
     {
-        _embedding = embedding;
+        _embed = embed;
         _threshold = threshold;
     }
 
-    public async Task<string> ClassifyAsync(string query)
+    public async Task<string> ClassifyAsync(float[] embeddingVector)
     {
-        var vector = await _embedding.GenerateAsync(query);
-
         IntentCluster? best = null;
         float bestScore = -1;
 
-        foreach (var cluster in _clusters)
+        foreach (var c in _clusters)
         {
-            if (cluster.Centroid is null)
-                continue;
-
-            var score = Cosine(vector, cluster.Centroid);
+            var score = Cosine(embeddingVector, c.Centroid);
 
             if (score > bestScore)
             {
                 bestScore = score;
-                best = cluster;
+                best = c;
             }
         }
 
-        // existing intent
-        if (best is not null && bestScore >= _threshold)
+        // ✔ existing cluster
+        if (best != null && bestScore >= _threshold)
         {
-            best.Add(query, vector);
+            best.Add(embeddingVector);
             return best.Id;
         }
 
-        // new intent
-        var newCluster = new IntentCluster(Guid.NewGuid().ToString("N"));
-        newCluster.Add(query, vector);
+        // ❗ new cluster
+        var newCluster = new IntentCluster();
+        newCluster.Add(embeddingVector);
 
         _clusters.Add(newCluster);
 
@@ -63,6 +64,6 @@ public sealed class DynamicIntentClassifier
             magB += b[i] * b[i];
         }
 
-        return dot / ((float)Math.Sqrt(magA) * (float)Math.Sqrt(magB));
+        return dot / (MathF.Sqrt(magA) * MathF.Sqrt(magB));
     }
 }

@@ -8,6 +8,33 @@ namespace EmbeddingPlayground.Llm.Services;
 
 public sealed class GeminiLlmService : ILlmService
 {
+    private static readonly string Schema = """
+    {
+      "type": "object",
+      "description": "Classify the user intention and output a JSON response for the input: {UserInput}",
+      "properties": {
+        "intent": {
+          "type": "string",
+          "description": "The main intent of the user request. (e.g. get_user_info, troubleshooting, how_to, comparison, etc.)"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Technical domain of the question (auth, billing, database, caching, messaging, networking, storage, observability, etc.)"
+        },
+        "normalizedQuery": {
+          "type": "string",
+          "description": "A cleaned and normalized version of the user question"
+        },
+        "answer": {
+          "type": "string",
+          "description": "A response to the user question based on the identified intent and domain."
+        }
+      },
+      "required": ["intent", "domain", "normalizedQuery", "answer"],
+      "additionalProperties": false
+    }
+    """;
+
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
 

@@ -1,181 +1,260 @@
-﻿using EmbeddingPlayground.Core.Abstractions;
-using EmbeddingPlayground.Embeddings.Models;
-using Microsoft.ML.OnnxRuntime;
+﻿using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Microsoft.ML.Tokenizers;
+using System.Text.RegularExpressions;
+
 
 namespace EmbeddingPlayground.Embeddings.Services;
 
-public sealed class E5EmbeddingService : IEmbeddingService
+using EmbeddingPlayground.Core.Abstractions;
+using EmbeddingPlayground.Embeddings.Helpers;
+using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
+using Microsoft.ML.Tokenizers;
+using System.Text.RegularExpressions;
+
+public sealed class WordPieceTokenizer
+{
+    private readonly Dictionary<string, int> _vocab;
+    private readonly int _unkId;
+
+    public WordPieceTokenizer(string vocabPath)
+    {
+        _vocab = File.ReadAllLines(vocabPath)
+            .Select((w, i) => (w, i))
+            .ToDictionary(x => x.w, x => x.i);
+
+        _unkId = _vocab["[UNK]"];
+    }
+
+    public List<int> Encode(string text)
+    {
+        text = text.ToLowerInvariant();
+        var tokens = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        var ids = new List<int>();
+
+        foreach (var token in tokens)
+        {
+            if (_vocab.TryGetValue(token, out var id))
+                ids.Add(id);
+            else
+                ids.Add(_unkId);
+        }
+
+        return ids;
+    }
+}
+
+public sealed class MiniLmEmbeddingService
+{
+    private readonly InferenceSession _session;
+    private readonly WordPieceTokenizer _tokenizer;
+
+    public MiniLmEmbeddingService(string modelPath, string vocabPath)
+    {
+        _session = new InferenceSession(Path.Combine(modelPath, "model.onnx"));
+        _tokenizer = new WordPieceTokenizer(vocabPath);
+    }
+
+    public float[] Embed(string text)
+    {
+        var inputIds = _tokenizer.Encode(text);
+
+        var ids = inputIds.Select(x => (long)x).ToArray();
+        var mask = Enumerable.Repeat(1L, ids.Length).ToArray();
+        var tokenTypeIds = new DenseTensor<long>(
+            Enumerable.Repeat(0L, ids.Length).ToArray(),
+            new[] { 1, ids.Length });
+
+        var inputs = new List<NamedOnnxValue>
+        {
+            NamedOnnxValue.CreateFromTensor("input_ids",
+                new DenseTensor<long>(ids, new[] { 1, ids.Length })),
+
+            NamedOnnxValue.CreateFromTensor("attention_mask",
+                new DenseTensor<long>(mask, new[] { 1, mask.Length })),
+
+            NamedOnnxValue.CreateFromTensor("token_type_ids", tokenTypeIds)
+        };
+
+        using var results = _session.Run(inputs);
+
+        var hidden = results
+            .First(x => x.Name == "last_hidden_state")
+            .AsTensor<float>();
+
+        return MeanPool(hidden);
+    }
+
+    private static float[] MeanPool(Tensor<float> hidden)
+    {
+        int seq = hidden.Dimensions[1];
+        int dim = hidden.Dimensions[2];
+
+        var v = new float[dim];
+
+        for (int i = 0; i < seq; i++)
+            for (int j = 0; j < dim; j++)
+                v[j] += hidden[0, i, j];
+
+        for (int j = 0; j < dim; j++)
+            v[j] /= seq;
+
+        return Normalize(v);
+    }
+
+    private static float[] Normalize(float[] v)
+    {
+        double sum = 0;
+
+        for (int i = 0; i < v.Length; i++)
+            sum += v[i] * v[i];
+
+        var norm = Math.Sqrt(sum);
+
+        for (int i = 0; i < v.Length; i++)
+            v[i] /= (float)norm;
+
+        return v;
+    }
+}
+public sealed class E5EmbeddingService : IEmbeddingService, IDisposable
 {
     private readonly InferenceSession _session;
     private readonly Tokenizer _tokenizer;
+    private readonly MiniLmEmbeddingService _miniLmEmbeddingService;
+
+    private const int MaxLen = 512;
 
     public E5EmbeddingService()
     {
         var modelPath = Path.Combine(
             AppContext.BaseDirectory,
             "Resources",
-            "model_qint8_avx512_vnni.onnx");
+            "all-MiniLM-L6-v2");
 
         var tokenizerPath = Path.Combine(
             AppContext.BaseDirectory,
             "Resources",
-            "tokenizer.json");
-
-        _session = new InferenceSession(modelPath);
-
-        var vocabPath = Path.Combine(
-            AppContext.BaseDirectory,
-            "Resources",
+            "all-MiniLM-L6-v2",
             "vocab.txt");
-        _tokenizer = BertTokenizer.Create(vocabPath);
+
+        _miniLmEmbeddingService = new MiniLmEmbeddingService(modelPath, tokenizerPath);
+
+        //_session = new InferenceSession(
+        //    Path.Combine(modelPath, "model.onnx"));
     }
 
-    public async Task<float[]> GenerateAsync(
-        string text,
-        CancellationToken cancellationToken = default)
+    public Task<(string normalizedText, float[] embeddingsVector)> GenerateAsync(string text, bool isQuery = true)
     {
-        text = $"query: {text}";
+        var analyzer = QueryAnalyzerFactory.Create();
+        var normalized = LuceneNormalizer.Normalize(text, analyzer);
 
-        var tokenized = Tokenize(text);
+        return Task.FromResult((normalized, _miniLmEmbeddingService.Embed(normalized)));
 
-        var inputs = CreateInputs(tokenized);
+        //text = Normalize(text);
 
-        using var results = _session.Run(inputs);
+        //// IMPORTANT: E5 format
+        //text = isQuery
+        //    ? $"query: {text}"
+        //    : $"passage: {text}";
 
-        var output = results
-            .First(x => x.Name == "last_hidden_state")
-            .AsTensor<float>();
+        //var tokenIds = _tokenizer.Encode(text).Ids;
 
-        return MeanPoolAndNormalize(
-            output,
-            tokenized.AttentionMask);
+        //if (tokenIds.Count > MaxLen)
+        //    tokenIds = tokenIds.Take(MaxLen).ToList();
+
+        //var inputIds = tokenIds.Select(x => (long)x).ToArray();
+        //var attentionMask = Enumerable.Repeat(1L, inputIds.Length).ToArray();
+
+        //var inputs = new List<NamedOnnxValue>
+        //{
+        //    NamedOnnxValue.CreateFromTensor(
+        //        "input_ids",
+        //        new DenseTensor<long>(inputIds, new[] { 1, inputIds.Length })),
+
+        //    NamedOnnxValue.CreateFromTensor(
+        //        "attention_mask",
+        //        new DenseTensor<long>(attentionMask, new[] { 1, attentionMask.Length }))
+        //};
+
+        //using var results = _session.Run(inputs);
+
+        //var hidden = results
+        //    .First(x => x.Name == "last_hidden_state")
+        //    .AsTensor<float>();
+
+        //return MeanPool(hidden, attentionMask);
     }
 
-    #region Private methods
-    private List<NamedOnnxValue> CreateInputs(TokenizedInput tokenized)
+    // -----------------------------
+    // Core pooling logic
+    // -----------------------------
+    private static float[] MeanPool(Tensor<float> hidden, long[] mask)
     {
-        var inputIds = new DenseTensor<long>(
-            tokenized.InputIds,
-            new[] { 1, tokenized.InputIds.Length });
+        int seqLen = hidden.Dimensions[1];
+        int dim = hidden.Dimensions[2];
 
-        var attentionMask = new DenseTensor<long>(
-            tokenized.AttentionMask,
-            new[] { 1, tokenized.AttentionMask.Length });
+        var embedding = new float[dim];
 
-        var tokenTypeIds = new DenseTensor<long>(
-            Enumerable.Repeat(0L, tokenized.InputIds.Length).ToArray(),
-            new[] { 1, tokenized.InputIds.Length });
+        int count = 0;
 
-        return new List<NamedOnnxValue>
+        for (int i = 0; i < seqLen; i++)
         {
-            NamedOnnxValue.CreateFromTensor("input_ids", inputIds),
-            NamedOnnxValue.CreateFromTensor("attention_mask", attentionMask),
-            NamedOnnxValue.CreateFromTensor("token_type_ids", tokenTypeIds)
-        };
-    }
-
-    private TokenizedInput Tokenize(string text)
-    {
-        const int maxLen = 512;
-
-        // E5 expects prefix
-        text = $"query: {text}";
-
-        var encoded = _tokenizer.EncodeToIds(text);
-
-        var inputIds = encoded
-            .Take(maxLen)
-            .Select(x => (long)x)
-            .ToArray();
-
-        var attentionMask = new long[inputIds.Length];
-
-        for (int i = 0; i < attentionMask.Length; i++)
-            attentionMask[i] = 1;
-
-        return new TokenizedInput
-        {
-            InputIds = inputIds,
-            AttentionMask = attentionMask
-        };
-    }
-
-    private static float[] MeanPoolAndNormalize(
-        Tensor<float> hiddenStates,
-        long[] attentionMask)
-    {
-        int sequenceLength =
-            hiddenStates.Dimensions[1];
-
-        int hiddenSize =
-            hiddenStates.Dimensions[2];
-
-        var embedding =
-            new float[hiddenSize];
-
-        long validTokens = 0;
-
-        for (int token = 0;
-             token < sequenceLength;
-             token++)
-        {
-            if (attentionMask[token] == 0)
+            if (mask[i] == 0)
                 continue;
 
-            validTokens++;
+            count++;
 
-            for (int dim = 0;
-                 dim < hiddenSize;
-                 dim++)
-            {
-                embedding[dim] +=
-                    hiddenStates[0, token, dim];
-            }
+            for (int j = 0; j < dim; j++)
+                embedding[j] += hidden[0, i, j];
         }
 
-        if (validTokens > 0)
+        if (count > 0)
         {
-            for (int dim = 0;
-                 dim < hiddenSize;
-                 dim++)
-            {
-                embedding[dim] /=
-                    validTokens;
-            }
+            for (int j = 0; j < dim; j++)
+                embedding[j] /= count;
         }
 
-        Normalize(embedding);
-
-        return embedding;
+        return Normalize(embedding);
     }
 
-    private static void Normalize(
-        float[] vector)
+    // -----------------------------
+    // Normalization (critical)
+    // -----------------------------
+    private static float[] Normalize(float[] vector)
     {
-        double magnitude = 0;
+        double sum = 0;
 
-        for (int i = 0;
-             i < vector.Length;
-             i++)
-        {
-            magnitude +=
-                vector[i] * vector[i];
-        }
+        for (int i = 0; i < vector.Length; i++)
+            sum += vector[i] * vector[i];
 
-        magnitude = Math.Sqrt(magnitude);
+        var norm = Math.Sqrt(sum);
 
-        if (magnitude == 0)
-            return;
+        if (norm == 0)
+            return vector;
 
-        for (int i = 0;
-             i < vector.Length;
-             i++)
-        {
-            vector[i] /=
-                (float)magnitude;
-        }
+        for (int i = 0; i < vector.Length; i++)
+            vector[i] /= (float)norm;
+
+        return vector;
     }
-    #endregion
+
+    // -----------------------------
+    // Text preprocessing (VERY important)
+    // -----------------------------
+    private static string Normalize(string text)
+    {
+        text = text.ToLowerInvariant();
+        text = text.Trim();
+        text = Regex.Replace(text, @"\s+", " ");
+        text = Regex.Replace(text, @"[^\w\s]", ""); // remove punctuation
+        return text;
+    }
+
+    public void Dispose()
+    {
+        _session.Dispose();
+    }
 }

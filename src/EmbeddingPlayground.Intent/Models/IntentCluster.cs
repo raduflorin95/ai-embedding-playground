@@ -2,50 +2,32 @@
 
 public sealed class IntentCluster
 {
-    public string Id { get; }
+    public string Id { get; } = Guid.NewGuid().ToString("N");
 
-    public List<string> Samples { get; } = new();
     public List<float[]> Vectors { get; } = new();
 
-    public float[]? Centroid { get; private set; }
+    public float[] Centroid { get; private set; }
 
-    public IntentCluster(string id)
+    public void Add(float[] vector)
     {
-        Id = id;
-    }
-
-    public void Add(string sample, float[] vector)
-    {
-        Samples.Add(sample);
         Vectors.Add(vector);
-
-        RecalculateCentroid();
+        Centroid = RecomputeCentroid();
     }
 
-    private void RecalculateCentroid()
+    private float[] RecomputeCentroid()
     {
-        if (Vectors.Count == 0)
-        {
-            Centroid = null;
-            return;
-        }
-
         var dim = Vectors[0].Length;
-        var sum = new float[dim];
+        var result = new float[dim];
 
         foreach (var v in Vectors)
         {
             for (int i = 0; i < dim; i++)
-            {
-                sum[i] += v[i];
-            }
+                result[i] += v[i];
         }
 
         for (int i = 0; i < dim; i++)
-        {
-            sum[i] /= Vectors.Count;
-        }
+            result[i] /= Vectors.Count;
 
-        Centroid = sum;
+        return result;
     }
 }

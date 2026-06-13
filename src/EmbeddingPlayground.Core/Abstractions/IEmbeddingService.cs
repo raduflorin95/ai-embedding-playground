@@ -2,7 +2,5 @@
 
 public interface IEmbeddingService
 {
-    Task<float[]> GenerateAsync(
-        string text,
-        CancellationToken cancellationToken = default);
+    Task<(string normalizedText, float[] embeddingsVector)> GenerateAsync(string text, bool isQuery = true);
 }
