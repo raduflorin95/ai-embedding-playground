@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EmbeddingPlayground.Console\EmbeddingPlayground.Console.csproj" />
     <ProjectReference Include="..\EmbeddingPlayground.Core\EmbeddingPlayground.Core.csproj" />
     <ProjectReference Include="..\EmbeddingPlayground.Embeddings\EmbeddingPlayground.Embeddings.csproj" />
     <ProjectReference Include="..\EmbeddingPlayground.Intent\EmbeddingPlayground.Intent.csproj" />

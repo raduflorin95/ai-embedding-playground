@@ -1,37 +1,39 @@
-﻿using EmbeddingPlayground.Gateway.Slack.Models;
+﻿using EmbeddingPlayground.Console.Services;
+using EmbeddingPlayground.Gateway.Slack.Models;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
+using static Lucene.Net.Util.Fst.Util;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace EmbeddingPlayground.Gateway.Slack.Services;
 
 public class SlackDispatcher
 {
-    private readonly RagService _rag;
+    private readonly QueryPipeline _pipeline;
     private readonly IHttpClientFactory _http;
     private readonly IConfiguration _config;
 
     public SlackDispatcher(
-        RagService rag,
+        QueryPipeline pipeline,
         IHttpClientFactory http,
         IConfiguration config)
     {
-        _rag = rag;
+        _pipeline = pipeline;
         _http = http;
         _config = config;
     }
 
-    public async Task HandleAsync(SlackEvent payload)
+    public async Task HandleAsync(SlackRequest payload)
     {
-        var question = Regex.Replace(payload.Event.Text, "<@[^>]+>", "").Trim();
-        var channel = payload.Event.Channel;
+        var question = Regex.Replace(payload.text, "<@[^>]+>", "").Trim();
+        var channel = payload.channel_id;
 
-        var answer = await _rag.ProcessAsync(question);
+        var answer = await _pipeline.AskAsync(question);
 
-        await SendMessage(channel, answer);
+        await SendMessage(payload.user_id, question, channel, answer);
     }
 
-    private async Task SendMessage(string channel, string text)
+    private async Task SendMessage(string userId, string question, string channel, string text)
     {
         var client = _http.CreateClient();
 
@@ -43,8 +45,9 @@ public class SlackDispatcher
             "https://slack.com/api/chat.postMessage",
             new
             {
+                response_type = "in_channel",
                 channel,
-                text
+                text = $"<@{userId}> asked: {question}\n\nAnswer:\n\n{text}"
             });
     }
 }

@@ -1,3 +1,4 @@
+using EmbeddingPlayground.Console.Services;
 using EmbeddingPlayground.Core.Abstractions;
 using EmbeddingPlayground.Core.Models;
 using EmbeddingPlayground.Embeddings.Services;
@@ -13,13 +14,15 @@ builder.Services.AddSingleton<IMemoryStore, InMemoryStore>();
 builder.Services.AddSingleton<IIntentExtractor, IntentExtractor>();
 builder.Services.AddSingleton<IEmbeddingService, E5EmbeddingService>();
 builder.Services.AddSingleton<DynamicIntentClassifier>();
+//services.AddSingleton<IQueryRewriter, OnnxQueryRewriter>();
+builder.Services.AddSingleton<QueryPipeline>();
 builder.Services.AddHttpClient<ILlmService, GeminiLlmService>();
-builder.Services.AddSingleton<Metrics>();
-builder.Services.AddScoped<RagService>();
 builder.Services.AddScoped<SlackDispatcher>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddAntiforgery();
 
 var app = builder.Build();
 
@@ -28,6 +31,6 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
+app.UseAntiforgery();
 app.MapEndpoints();
 app.Run();

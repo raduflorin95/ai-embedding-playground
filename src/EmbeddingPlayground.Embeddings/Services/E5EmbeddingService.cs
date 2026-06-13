@@ -132,12 +132,12 @@ public sealed class E5EmbeddingService : IEmbeddingService, IDisposable
         var modelPath = Path.Combine(
             AppContext.BaseDirectory,
             "Resources",
-            "all-MiniLM-L6-v2");
+            "bge-large-en-v1.5");
 
         var tokenizerPath = Path.Combine(
             AppContext.BaseDirectory,
             "Resources",
-            "all-MiniLM-L6-v2",
+            "bge-large-en-v1.5",
             "vocab.txt");
 
         _miniLmEmbeddingService = new MiniLmEmbeddingService(modelPath, tokenizerPath);
@@ -151,7 +151,7 @@ public sealed class E5EmbeddingService : IEmbeddingService, IDisposable
         var analyzer = QueryAnalyzerFactory.Create();
         var normalized = LuceneNormalizer.Normalize(text, analyzer);
 
-        return Task.FromResult((normalized, _miniLmEmbeddingService.Embed(normalized)));
+        return Task.FromResult((normalized, _miniLmEmbeddingService.Embed(text)));
 
         //text = Normalize(text);
 

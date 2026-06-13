@@ -8,9 +8,9 @@ public sealed class InMemoryStore : IMemoryStore
     private readonly List<MemoryEntry> _entries = new();
     private readonly object _lock = new();
 
-    private const float EmbeddingWeight = 0.75f;
-    private const float FuzzyWeight = 0.25f;
-    private const float Threshold = 0.92f;
+    private const float EmbeddingWeight = 0.90f;
+    private const float FuzzyWeight = 0.10f;
+    private const float Threshold = 0.85f;
 
     public Task AddAsync(MemoryEntry entry, CancellationToken ct = default)
     {
@@ -39,17 +39,16 @@ public sealed class InMemoryStore : IMemoryStore
                     embedding,
                     e.Embedding);
 
-                // 2. fuzzy similarity (typos / wording)
-                var fuzzyScore = Fuzz.Ratio(query, e.Query) / 100f;
-
-                // 3. hybrid score
-                var score =
-                    (embeddingScore * EmbeddingWeight) +
-                    (fuzzyScore * FuzzyWeight);
-
-                if (score > bestScore)
+                if (embeddingScore < Threshold)
                 {
-                    bestScore = score;
+                    // 2. fuzzy similarity (typos / wording)
+                    var fuzzyScore = Fuzz.Ratio(query, e.Query) / 100f;
+                    embeddingScore += fuzzyScore * FuzzyWeight;
+                } 
+
+                if (embeddingScore > bestScore)
+                {
+                    bestScore = embeddingScore;
                     best = e;
                 }
             }

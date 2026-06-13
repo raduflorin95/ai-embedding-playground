@@ -11,21 +11,24 @@ public static class Endpoints
     {
         app.MapPost("/slack/events", async (
             HttpContext context,
+            [FromForm] SlackRequest payload,
             [FromServices] SlackDispatcher dispatcher) =>
         {
-            var payloadText = await new StreamReader(context.Request.Body).ReadToEndAsync();
-            var payloadJson = JsonSerializer.Deserialize<JsonElement> (payloadText);
+            //var payloadText = await new StreamReader(context.Request.Body).ReadToEndAsync();
+            //var payloadJson = JsonSerializer.Deserialize<JsonElement> (payloadText);
 
-            // Slack URL verification handshake
-            if (payloadJson.GetProperty("type").GetString() == "url_verification")
-            {
-                return Results.Ok(payloadJson);
-            }
+            //var form = context.Request.ReadFormAsync();
 
-            var payload = JsonSerializer.Deserialize<SlackEvent>(payloadText, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            //// Slack URL verification handshake
+            //if (payloadJson.GetProperty("type").GetString() == "url_verification")
+            //{
+            //    return Results.Ok(payloadJson);
+            //}
+
+            //var payload = JsonSerializer.Deserialize<SlackEvent>(payloadText, new JsonSerializerOptions(JsonSerializerDefaults.Web));
             _ = dispatcher.HandleAsync(payload!);
 
             return Results.Ok();
-        });
+        }).DisableAntiforgery();
     }
 }

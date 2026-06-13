@@ -1,4 +1,5 @@
-﻿using EmbeddingPlayground.Core.Abstractions;
+﻿using EmbeddingPlayground.Console.Data;
+using EmbeddingPlayground.Core.Abstractions;
 using EmbeddingPlayground.Core.Models;
 using EmbeddingPlayground.Intent.Services;
 
@@ -42,13 +43,14 @@ public sealed class QueryPipeline
         if (cached != null)
         {
             System.Console.WriteLine("CACHE HIT");
-            return cached.Entry.Answer;
+            return $"CACHED:\n{cached.Entry.Answer}";
         }
 
         System.Console.WriteLine("LLM CALL");
 
         // 4. fallback to LLM
-        var answer = await _llm.AskAsync(query);
+        //var answer = await _llm.AskAsync(query);
+        var answer = DocGenerator.Generate(1).First().Content;
 
         // 5. store result
         await _memory.AddAsync(new MemoryEntry(

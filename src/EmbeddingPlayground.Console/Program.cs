@@ -31,6 +31,7 @@ var memory = provider.GetRequiredService<IMemoryStore>();
 var llm = provider.GetRequiredService<ILlmService>();
 var pipeline = provider.GetRequiredService<QueryPipeline>();
 
+
 while (true)
 {
     Console.WriteLine("Ask a question:");
